@@ -1,5 +1,10 @@
 const express=require("express")
+// Create instance of http server 
 const app=express();
+
+const {courseRouter}=require("./Routes/course");
+const {userRouter}=require("./Routes/user");
+
 const mongoose=require("mongoose")
 import {z} from 'zod';
 const bcrypt=require("bcrypt")
@@ -8,44 +13,14 @@ mongoose.connect("").then(console.log("connected!"));
 
 app.use(express.json());
 
-app.post("/signup",async (req,res)=>{
+// Better way to create Route
 
-    try{
-        const name=req.body.name;
-        const email=req.body.email;
-        const password=req.body.password;
+app.use("/user",userRouter);
+app.use("/course",courseRouter);
 
-        await UserSchema.create({
-            name: name,
-            email: email,
-            password: bcrypt.hash(password,5)
-        })
-
-    res.json({
-        message: "user is connected"
-    })
-    }catch(e){
-        res.json({
-            message: "User not connected!"
-        })
-    }
-})
-
-app.post("/signin",(req,res)=>{
-
-})
-
-app.post("/purchase",(req,res)=>{
-
-})
-
-app.get("/course",(req,res)=>{
-
-})
-
-function auth(req,res,next){
-    const token=req.headers;
-}
+// Not better way
+// userRoutes(app);
+// courserRouter(app);
 
 app.listen(3000);
 
