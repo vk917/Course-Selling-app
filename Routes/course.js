@@ -1,6 +1,8 @@
 const express=require("express");
 const Router=express.Router;
 
+express().use(express.json());
+
 const courseRouter=Router();
 
      // End point to purchase course
@@ -11,11 +13,15 @@ courseRouter.post("/purchase",(req,res)=>{
     })
 
     // User see all courses
-courseRouter.get("/course/preview",(req,res)=>{
+courseRouter.get("/preview",(req,res)=>{
     res.json({
-        message: ""
+        message: "Preview"
     })
 })
+
+module.exports={
+    courseRouter: courseRouter
+}
 
 // function courserRouter(app){
     

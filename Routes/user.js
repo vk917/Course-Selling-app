@@ -1,7 +1,9 @@
 // Better Way to Handle Route 
 // instead of exporting them as fn
 
+const express=require("express");
 const {Router}=require("express");
+express().use(express.json());
 
 const userRouter=Router();
 
