@@ -1,40 +1,108 @@
 const express=require("express");
+const z= require("zod");
+const bcrypt= require("bcrypt");
 const app=express();
+const jwt=require("jsonwebtoken")
+const {JWT_ADMIN_SECRET}=require("../config")
 
-const {adminSchema}=require("../db");
+const {adminSchema , courseSchema}=require("../db");
+
+const { adminMiddleware } = require("../middleware/admin");
 
 const Router=express.Router;
 
 const adminRouter=Router();
 
-adminRouter.post("signup",async (req,res)=>{
+adminRouter.post("/signup",async (req,res)=>{
     try{
-        const name=req.body.name;
-        const email=req.body.email;
-        const password=req.body.password;
-
-        await UserSchema.create({
-            name: name,
-            email: email,
-            password: bcrypt.hash(password,5)
+        
+        const adminCheck=z.object({
+            email: z.string().min(3).max(20).email(),
+            password: z.string().min(3).max(12),
+            firstName: z.string().min(3).max(12),
+            lastName: z.string().min(3).max(12),
         })
-        res.json({
-                    message: "user is connected"
-                })
+
+        const parsedCheck=adminCheck.safeParse(req.body);
+        console.log(req.body);
+
+        if (!parsedCheck.success) {
+            return res.status(400).json({ message: "Invalid input", error: parsedCheck.error });
+        }
+    
+        if(parsedCheck.success){
+            const {email,password, firstname, lastname}=req.body;   
+            const hasedPassword=await bcrypt.hash(password,5);   
+
+            await adminSchema.create({
+                email: email,
+                password: hasedPassword,
+                firstName: firstname,
+                lastName: lastname
+            })
+            res.json({
+                message: "user is connected"
+            })
+        }
     }catch(e){
+        console.error("Error:", e);
+
         res.json({
-            message: "User not connected!"
+            message: "User not kvjkvjkvjk connected!"
         })
     }
 })
         
-adminRouter.post("/signin",(req,res)=>{
+adminRouter.post("/signin",async (req,res)=>{
+    const {email,password}=req.body;
+
+    const user=await adminSchema.findOne({
+        email: email,
+    })
+    console.log(user);
+    
+
+    if(user){
+        const passwComp=await bcrypt.compare(password,user.password);
+        if(passwComp){
+            const token=jwt.sign({
+                _id: user._id
+            },JWT_ADMIN_SECRET);
+
+            res.json({
+                token: token
+            })
+        }
+        else{
+            res.json({
+                message: "incorrect "
+            })
+        }
+    }else{
+        res.json({
+            message: "user not found "
+        })
+    }
 
 })
 
-// User see all courses
-adminRouter.post("/course",(req,res)=>{
+// create course
+adminRouter.post("/course",adminMiddleware,async (req,res)=>{
+    const adminid=req.adminid;
 
+    const {title,description,price,imageUrl}=req.body;
+
+    const course=await courseSchema.create({
+        title,
+        description,
+        price,
+        imageUrl,
+        createrId: adminid
+    })
+
+    res.json({
+        message: "Course Created"
+    })
 })
 
 //Edit the course

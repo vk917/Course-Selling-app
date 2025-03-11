@@ -2,7 +2,7 @@ const mongoose=require("mongoose");
 const Schema=mongoose.Schema;
 const ObjectId=Schema.ObjectId;
 
-mongoose.connect("mongodb+srv://kuvishal056:s6lX21FMg01S8k06@cluster0.siqf0.mongodb.net/Course-Selling");
+mongoose.connect(process.env.MONGO_URL);
 
 const userS=new Schema({
 
@@ -14,10 +14,11 @@ const userS=new Schema({
 
 
 const adminS=new Schema({
-    _id: ObjectId,
-    name: String,
+   
     email: String,
-    password: String
+    password: String,
+    firstName: String,
+    lastName: String,
 })
 
 
@@ -36,14 +37,14 @@ const purchaseS=new Schema({
     userId: ObjectId
 })
 
-const UserSchema=mongoose.model("user",userS);
+const UserSchema=mongoose.model("users",userS);
 const adminSchema=mongoose.model("admin",adminS);
-const coursechema=mongoose.model("course",courseS);
+const courseSchema=mongoose.model("course",courseS);
 const purchaseSchema=mongoose.model("purchases",purchaseS);
 
 module.exports={
     UserSchema,
     adminSchema,
-    coursechema,
+    courseSchema,
     purchaseSchema
 }
